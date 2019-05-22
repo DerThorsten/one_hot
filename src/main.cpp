@@ -42,6 +42,7 @@ void get_one_hot(
 template<class T>
 inline xt::pytensor<uint8_t,2 > py_one_hot(const xt::pytensor<T,1 > & labels, const uint64_t n_labels)
 {
+    py::gil_scoped_release release;
     auto one_hot = xt::pytensor<uint8_t,2 >::from_shape({ int64_t(labels.size()), int64_t(n_labels)});
     get_one_hot(labels.data(), labels.size(), n_labels, one_hot.data());
     return one_hot;
