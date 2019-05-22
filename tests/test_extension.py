@@ -40,7 +40,7 @@ class ExampleTest(TestCase):
 
         res = one_hot.one_hot(dna,mapping, 4)
         print(res.shape)
-        assert res[0,0] == 12
+        assert res[0,0] == 1
         assert res[0,1] == 0
         assert res[0,2] == 0
         assert res[0,3] == 0
