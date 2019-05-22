@@ -39,6 +39,42 @@ void get_one_hot(
 
 
 
+template<class PTR_IN, class MAPPING,class PTR_OUT>
+void get_one_hot(
+    const PTR_IN * labels,
+    const MAPPING * mapping,
+    const uint64_t size,
+    const uint64_t n_labels,
+    PTR_OUT * one_hot
+){
+    std::fill(one_hot, one_hot+size*n_labels,0);
+    for(uint64_t i=0; i<size; ++i)
+    {   
+        const auto l = mapping[labels[i]];
+        one_hot[n_labels*i + l] = 1;
+    }
+}
+
+
+
+inline xt::pytensor<uint8_t,2 > py_one_hot_mappend(
+  const xt::pytensor<uint8_t,1 > & labels, 
+  const xt::pytensor<uint8_t,1> & mapping,
+  const uint64_t n_labels
+)
+{
+    py::gil_scoped_release release;
+    auto one_hot = xt::pytensor<uint8_t,2 >::from_shape({ int64_t(labels.size()), int64_t(n_labels)});
+    get_one_hot(
+      labels.data(), 
+      mapping.data(),
+      labels.size(), 
+      n_labels, 
+      one_hot.data()
+    );
+    return one_hot;
+}
+
 template<class T>
 inline xt::pytensor<uint8_t,2 > py_one_hot(const xt::pytensor<T,1 > & labels, const uint64_t n_labels)
 {
@@ -68,5 +104,8 @@ PYBIND11_MODULE(one_hot, m)
 
     m.def("one_hot", py_one_hot<uint8_t>, "one hot");
     m.def("one_hot", py_one_hot<int64_t>, "one hot");
+
+    m.def("one_hot", py_one_hot_mappend, "one hot",
+    py::arg("labels"), py::arg("mapping"), py::arg("n_labels"));
 
 }
